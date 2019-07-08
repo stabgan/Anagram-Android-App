@@ -5,3 +5,5 @@ Mastering Java by making Android games .
 Project 1.
 
 ![down](https://raw.githubusercontent.com/stabgan/Anagram-Android-App/master/Screenshots/Screenshot_1562616174.png)
+![down](https://raw.githubusercontent.com/stabgan/Anagram-Android-App/master/Screenshots/Screenshot_1562616253.png)
+![down](https://raw.githubusercontent.com/stabgan/Anagram-Android-App/master/Screenshots/Screenshot_1562616238.png)
