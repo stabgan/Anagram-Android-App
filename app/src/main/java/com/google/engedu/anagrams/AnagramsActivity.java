@@ -17,12 +17,11 @@ package com.google.engedu.anagrams;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.InputType;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -34,15 +33,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
-
 public class AnagramsActivity extends AppCompatActivity {
 
-    public static final String START_MESSAGE = "Find as many words as possible that can be formed by adding one letter to <big>%s</big> (but that do not contain the substring %s).";
+    public static final String START_MESSAGE =
+            "Find as many words as possible that can be formed by adding one letter to "
+                    + "<big>%s</big> (but that do not contain the substring %s).";
+
     private AnagramDictionary dictionary;
     private String currentWord;
     private List<String> anagrams;
@@ -51,26 +57,29 @@ public class AnagramsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_anagrams);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         AssetManager assetManager = getAssets();
         try {
             InputStream inputStream = assetManager.open("words.txt");
             dictionary = new AnagramDictionary(new InputStreamReader(inputStream));
         } catch (IOException e) {
-            Toast toast = Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG);
-            toast.show();
+            Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG).show();
         }
-        // Set up the EditText box to process the content of the box when the user hits 'enter'
-        final EditText editText = (EditText) findViewById(R.id.editText);
+
+        final EditText editText = findViewById(R.id.editText);
         editText.setRawInputType(InputType.TYPE_CLASS_TEXT);
         editText.setImeOptions(EditorInfo.IME_ACTION_GO);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_GO || (
-                        actionId == EditorInfo.IME_NULL && event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                if (actionId == EditorInfo.IME_ACTION_GO
+                        || (actionId == EditorInfo.IME_NULL
+                        && event != null
+                        && event.getAction() == KeyEvent.ACTION_DOWN)) {
                     processWord(editText);
                     handled = true;
                 }
@@ -80,9 +89,9 @@ public class AnagramsActivity extends AppCompatActivity {
     }
 
     private void processWord(EditText editText) {
-        TextView resultView = (TextView) findViewById(R.id.resultView);
+        TextView resultView = findViewById(R.id.resultView);
         String word = editText.getText().toString().trim().toLowerCase();
-        if (word.length() == 0) {
+        if (word.isEmpty()) {
             return;
         }
         String color = "#cc0029";
@@ -92,51 +101,49 @@ public class AnagramsActivity extends AppCompatActivity {
         } else {
             word = "X " + word;
         }
-        resultView.append(Html.fromHtml(String.format("<font color=%s>%s</font><BR>", color, word)));
+        resultView.append(fromHtml(String.format("<font color=%s>%s</font><BR>", color, word)));
         editText.setText("");
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_anagrams, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     public boolean defaultAction(View view) {
-        TextView gameStatus = (TextView) findViewById(R.id.gameStatusView);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        EditText editText = (EditText) findViewById(R.id.editText);
-        TextView resultView = (TextView) findViewById(R.id.resultView);
+        TextView gameStatus = findViewById(R.id.gameStatusView);
+        FloatingActionButton fab = findViewById(R.id.fab);
+        EditText editText = findViewById(R.id.editText);
+        TextView resultView = findViewById(R.id.resultView);
+
         if (currentWord == null) {
             currentWord = dictionary.pickGoodStarterWord();
             anagrams = dictionary.getAnagramsWithOneMoreLetter(currentWord);
-            gameStatus.setText(Html.fromHtml(String.format(START_MESSAGE, currentWord.toUpperCase(), currentWord)));
+            gameStatus.setText(fromHtml(
+                    String.format(START_MESSAGE, currentWord.toUpperCase(), currentWord)));
             fab.setImageResource(android.R.drawable.ic_menu_help);
             fab.hide();
             resultView.setText("");
             editText.setText("");
             editText.setEnabled(true);
             editText.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+            InputMethodManager imm =
+                    (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+            }
         } else {
             editText.setText(currentWord);
             editText.setEnabled(false);
@@ -146,5 +153,14 @@ public class AnagramsActivity extends AppCompatActivity {
             gameStatus.append(" Hit 'Play' to start again");
         }
         return true;
+    }
+
+    @SuppressWarnings("deprecation")
+    private static Spanned fromHtml(String html) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            return Html.fromHtml(html);
+        }
     }
 }
