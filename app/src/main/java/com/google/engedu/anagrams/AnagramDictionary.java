@@ -56,22 +56,15 @@ public class AnagramDictionary {
         }
 
 
-        ArrayList<String> similarWords;
         for (String word : wordSet) {
-            if (lettersToWord.containsKey(sortLetters(word))) {
-                similarWords = lettersToWord.get(sortLetters(word));
+            String sortedWord = sortLetters(word);
+            if (lettersToWord.containsKey(sortedWord)) {
+                lettersToWord.get(sortedWord).add(word);
+            } else {
+                ArrayList<String> similarWords = new ArrayList<>();
                 similarWords.add(word);
-                lettersToWord.put(sortLetters(word) , similarWords);
-                similarWords.clear();
+                lettersToWord.put(sortedWord, similarWords);
             }
-            else {
-                similarWords = new ArrayList<String>();
-                similarWords.add(word);
-                lettersToWord.put(sortLetters(word) , similarWords);
-                similarWords.clear();
-            }
-
-
         }
     }
 
